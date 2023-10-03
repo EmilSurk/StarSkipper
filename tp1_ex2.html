@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TP1 - Ex2 - Solution</title>
+    <style>
+        body{
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+    </style>
+    <script>
+        let canvas;    // Objet DOM correspondant au canvas
+        let graphics;  // Contexte de graphique 2d pour dessiner sur la canvas
+
+        // Variable pour la position des étoiles
+        let constellations = [];
+
+        /* Propriétés de l'application (Note: vous pouvez changer ces valeurs pour tester votre code) */
+        // Propriétés de la ville
+        const cityLength = 64;
+        const buildingWidth = 0.1;
+        let farBuildingsHeights = [];
+        let middleBuildingsHeights = [];
+        let closeBuildingsHeights = [];
+        let farBuildingsPos = [];
+        let middleBuildingsPos = [];
+        let closeBuildingsPos = [];
+        const close_build_color = "rgb(150, 150, 150)";
+        const middle_building_color = "rgb(100, 100, 100)";
+        const far_building_color = "rgb(75, 75, 75)";
+
+        // Propriétés du vaisseau 
+        let vesselPos = {x:0, y:0}
+        const maxSpeed = -25;
+        const minSpeed = -10;
+        let speed = minSpeed; // pixels per millisecond
+        let acceleration = 0.1; // pixels per millisecond per millisecond
+
+
+        function generate_constellations(){
+            // Génération des constellations
+            let dispersion = 0.1;
+            for (let i=0; i < 1/dispersion; i++) {
+                for (let j=0; j < 1/dispersion; j++){
+                    let n_stars = Math.floor(1 + Math.random() * 7);
+                    let cx = (i + 0.5) * dispersion + (Math.random()-0.5) * dispersion / 2
+                    let cy = (j + 0.5) * dispersion + (Math.random()-0.5) * dispersion / 2
+
+                    let stars = [];
+                    for (let k=0; k < n_stars; k++) {
+                        let pos = {x: cx + dispersion * (Math.random() - 0.5), y: cy + dispersion * (Math.random() - 0.5)}
+                        stars.push(pos)
+                    }
+                    constellations.push(stars)
+                }
+            }
+        }
+
+        function generate_city() {
+            // TODO: Complétez cette fonction pour la partie 2
+        }
+
+        function draw_smog() {
+            // TODO: Complétez cette fonction pour la partie 1
+        }
+
+        function draw() {
+            // On nettoie le canvas avant de redessiner
+            graphics.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dessine le background
+            draw_background();
+
+            // On dessine la ville
+            draw_city();
+
+            // On dessine le vaisseau
+            draw_vessel();
+
+            // Draw smog
+            draw_smog();
+        }
+
+        function draw_vessel(){
+            // TODO: Complétez cette fonction pour la partie 3
+        }
+
+        function draw_background(){
+            // TODO: Complétez cette fonction pour la partie 1
+        }
+
+        function draw_city(){
+            // TODO: Complétez cette fonction pour la partie 2
+        }
+
+        function updateVesselPosition(e){
+            // TODO: Complétez cette fonction pour la partie 4
+            // Touche W ou Up
+            // if ( e.keyCode == ???  ) {
+                // COMPLÉTEZ
+            // }
+
+            // Touche S ou Down
+
+            // Touche A ou Left
+
+            // Touche D ou Right
+
+            // Touche Espace
+        }
+
+        function releaseSpace(e){
+            // TODO: Complétez cette fonction pour la partie 4
+            // COMPLÉTEZ
+        }
+
+        function init() {
+            // Initialisation du dessin. Il s'affiche sur toute la fenêtre
+            canvas = document.getElementById("theCanvas");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            window.addEventListener("keydown", updateVesselPosition, true);
+            window.addEventListener("keyup", releaseSpace, true);
+            graphics = canvas.getContext("2d");
+
+            // Initialisation
+            generate_constellations();
+            generate_city();
+            requestAnimationFrame(update);
+        }
+
+        function update(){
+            // Mise à jour de la position des édifices
+            // TODO: Complétez cette fonction pour la partie 2
+
+            // On dessine !
+            draw()
+
+            // Request new animation frame
+            requestAnimationFrame(update);
+        }
+    </script>
+</head>
+<body onload="init()">
+<canvas id="theCanvas"></canvas>
+</body>
+</html>
