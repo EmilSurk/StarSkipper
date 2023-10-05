@@ -42,14 +42,16 @@
         function generate_constellations(){
             // Génération des constellations
             let dispersion = 0.1;
-            for (let i=0; i < 1/dispersion; i++) {
-                for (let j=0; j < 1/dispersion; j++){
+
+            for (let i = 0; i < 1/dispersion; i++) {
+                for (let j = 0; j < 1/dispersion; j++){
                     let n_stars = Math.floor(1 + Math.random() * 7);
                     let cx = (i + 0.5) * dispersion + (Math.random()-0.5) * dispersion / 2
                     let cy = (j + 0.5) * dispersion + (Math.random()-0.5) * dispersion / 2
 
                     let stars = [];
-                    for (let k=0; k < n_stars; k++) {
+
+                    for (let k = 0; k < n_stars; k++) {
                         let pos = {x: cx + dispersion * (Math.random() - 0.5), y: cy + dispersion * (Math.random() - 0.5)}
                         stars.push(pos)
                     }
@@ -59,11 +61,29 @@
         }
 
         function generate_city() {
-            // TODO: Complétez cette fonction pour la partie 2
+            for(let i = 0; i < cityLength; i++) {
+                // Les bâtiments les plus éloignés sont les plus grands
+                farBuildingsHeights.push(Math.random() * canvas.height/2 + canvas.height/3);
+                // Les bâtiments de distance moyenne sont de taille moyenne
+                middleBuildingsHeights.push(Math.random() * canvas.height/3 + canvas.height/5);
+                // Les bâtiments les plus proches sont les plus petits
+                closeBuildingsHeights.push(Math.random() * canvas.height/4 + canvas.height/8);
+
+                farBuildingsPos.push(i * buildingWidth);
+                middleBuildingsPos.push(i * buildingWidth);
+                closeBuildingsPos.push(i * buildingWidth);
+            }
         }
 
         function draw_smog() {
-            // TODO: Complétez cette fonction pour la partie 1
+            // Dégradé de smog vertical
+            const gradient = graphics.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(0, 0, 0, 0.7)"); // Couleur sombre en haut
+            gradient.addColorStop(1, "rgba(0, 0, 0, 0)");   // Transparent en bas
+
+            // Appliquer le dégradé au rectangle plein écran
+            graphics.fillStyle = gradient;
+            graphics.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function draw() {
@@ -84,15 +104,81 @@
         }
 
         function draw_vessel(){
-            // TODO: Complétez cette fonction pour la partie 3
-        }
+    // Dessiner le vaisseau constitué de deux triangles orientés horizontalement et pointant vers l'extérieur
+
+            // Dessiner la propulsion bleue floue du vaisseau
+            graphics.shadowBlur = 20;
+            graphics.shadowColor = "blue";
+
+            // Triangle gauche (turquoise) pointant vers la gauche
+            graphics.fillStyle = "turquoise";
+            graphics.beginPath();
+            graphics.moveTo(canvas.width / 2, canvas.height / 2 - 15); // Point du haut
+            graphics.lineTo(canvas.width / 2, canvas.height / 2 + 15); // Point du bas
+            graphics.lineTo(canvas.width / 2 - 60, canvas.height / 2); // Sommet gauche
+            graphics.closePath();
+            graphics.fill();
+
+            graphics.shadowBlur = 0;  // Réinitialiser le flou pour les autres dessins
+
+            // Triangle droit (brun clair) pointant vers la droite
+            graphics.fillStyle = "#c68c53";
+            graphics.beginPath();
+            graphics.moveTo(canvas.width / 2, canvas.height / 2 - 15); // Point du haut
+            graphics.lineTo(canvas.width / 2, canvas.height / 2 + 15); // Point du bas
+            graphics.lineTo(canvas.width / 2 + 70, canvas.height / 2 + 10); // Sommet droit
+            graphics.closePath();
+            graphics.fill();
+}
+
+
 
         function draw_background(){
-            // TODO: Complétez cette fonction pour la partie 1
+            // Couleur de fond sombre
+            graphics.fillStyle = "#ff99ff";
+            graphics.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dessiner les étoiles et les constellations
+            graphics.fillStyle = "white";
+            graphics.strokeStyle = "white";
+            graphics.lineWidth = 2;
+
+            for (const constellation of constellations) {
+                for (const star of constellation) {
+                    // Dessiner une étoile sous forme de cercle
+                    graphics.beginPath();
+                    graphics.arc(star.x * canvas.width, star.y * canvas.height, 3, 0, Math.PI * 2);
+                    graphics.fill();
+
+                    // Dessiner des lignes pointillées pour les constellations
+                    for (const otherStar of constellation) {
+                        graphics.beginPath();
+                        graphics.moveTo(star.x * canvas.width, star.y * canvas.height);
+                        graphics.lineTo(otherStar.x * canvas.width, otherStar.y * canvas.height);
+                        graphics.stroke();
+                    }
+                }
+            }
         }
 
         function draw_city(){
-            // TODO: Complétez cette fonction pour la partie 2
+            // Dessiner les bâtiments lointains
+            graphics.fillStyle = far_building_color;
+            for(let i = 0; i < cityLength; i++) {
+                graphics.fillRect(farBuildingsPos[i] * canvas.width, canvas.height - farBuildingsHeights[i], buildingWidth * canvas.width, farBuildingsHeights[i]);
+            }
+
+            // Dessiner les bâtiments moyens
+            graphics.fillStyle = middle_building_color;
+            for(let i = 0; i < cityLength; i++) {
+                graphics.fillRect(middleBuildingsPos[i] * canvas.width, canvas.height - middleBuildingsHeights[i], buildingWidth * canvas.width, middleBuildingsHeights[i]);
+            }
+
+            // Dessiner les bâtiments proches
+            graphics.fillStyle = close_build_color;
+            for(let i = 0; i < cityLength; i++) {
+                graphics.fillRect(closeBuildingsPos[i] * canvas.width, canvas.height - closeBuildingsHeights[i], buildingWidth * canvas.width, closeBuildingsHeights[i]);
+            }
         }
 
         function updateVesselPosition(e){
