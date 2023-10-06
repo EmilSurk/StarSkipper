@@ -103,19 +103,23 @@
             draw_smog();
         }
 
-        function draw_vessel(){
-    // Dessiner le vaisseau constitué de deux triangles orientés horizontalement et pointant vers l'extérieur
+        function draw_vessel() {
+            // Dessiner le vaisseau constitué de deux triangles orientés horizontalement et pointant vers l'extérieur
 
             // Dessiner la propulsion bleue floue du vaisseau
             graphics.shadowBlur = 20;
             graphics.shadowColor = "blue";
 
+            // Adjust the triangles according to vesselPos values
+            let vesselX = canvas.width / 2 + vesselPos.x;
+            let vesselY = canvas.height / 2 + vesselPos.y;
+
             // Triangle gauche (turquoise) pointant vers la gauche
             graphics.fillStyle = "turquoise";
             graphics.beginPath();
-            graphics.moveTo(canvas.width / 2, canvas.height / 2 - 15); // Point du haut
-            graphics.lineTo(canvas.width / 2, canvas.height / 2 + 15); // Point du bas
-            graphics.lineTo(canvas.width / 2 - 60, canvas.height / 2); // Sommet gauche
+            graphics.moveTo(vesselX, vesselY - 15);  // Point du haut
+            graphics.lineTo(vesselX, vesselY + 15);  // Point du bas
+            graphics.lineTo(vesselX - 60, vesselY);  // Sommet gauche
             graphics.closePath();
             graphics.fill();
 
@@ -124,12 +128,14 @@
             // Triangle droit (brun clair) pointant vers la droite
             graphics.fillStyle = "#c68c53";
             graphics.beginPath();
-            graphics.moveTo(canvas.width / 2, canvas.height / 2 - 15); // Point du haut
-            graphics.lineTo(canvas.width / 2, canvas.height / 2 + 15); // Point du bas
-            graphics.lineTo(canvas.width / 2 + 70, canvas.height / 2 + 10); // Sommet droit
+            graphics.moveTo(vesselX, vesselY - 15);  // Point du haut
+            graphics.lineTo(vesselX, vesselY + 15);  // Point du bas
+            graphics.lineTo(vesselX + 70, vesselY + 15);  // Sommet droit
             graphics.closePath();
             graphics.fill();
-}
+        }
+
+
 
 
 
@@ -163,7 +169,7 @@
 
         function draw_city(){
             // Dessiner les bâtiments lointains
-            graphics.fillStyle = far_building_color;
+            graphics.fillStyle = close_build_color;
             for(let i = 0; i < cityLength; i++) {
                 graphics.fillRect(farBuildingsPos[i] * canvas.width, canvas.height - farBuildingsHeights[i], buildingWidth * canvas.width, farBuildingsHeights[i]);
             }
@@ -175,31 +181,44 @@
             }
 
             // Dessiner les bâtiments proches
-            graphics.fillStyle = close_build_color;
+            graphics.fillStyle = far_building_color;
             for(let i = 0; i < cityLength; i++) {
                 graphics.fillRect(closeBuildingsPos[i] * canvas.width, canvas.height - closeBuildingsHeights[i], buildingWidth * canvas.width, closeBuildingsHeights[i]);
             }
         }
 
         function updateVesselPosition(e){
-            // TODO: Complétez cette fonction pour la partie 4
-            // Touche W ou Up
-            // if ( e.keyCode == ???  ) {
-                // COMPLÉTEZ
-            // }
 
-            // Touche S ou Down
+            // For vertical movement (up and down)
+            if (e.keyCode === 87 || e.keyCode === 38) { // W or Up Arrow
+                vesselPos.y -= 10;
+            }
+            
+            if (e.keyCode === 83 || e.keyCode === 40) { // S or Down Arrow
+                vesselPos.y += 10;
+            }
 
-            // Touche A ou Left
+            
+            if (e.keyCode === 65 || e.keyCode === 37) { // A or Left Arrow
+                vesselPos.x -= 10;
+            }
 
-            // Touche D ou Right
-
-            // Touche Espace
+            if (e.keyCode === 68 || e.keyCode === 39) { // D or Right Arrow
+                vesselPos.x += 10;
+            }
+        
+                    // Check if the space bar is pressed for boost acceleration
+            if (e.keyCode === 32) { // Spacebar
+                speed += acceleration; 
+            }
         }
 
         function releaseSpace(e){
-            // TODO: Complétez cette fonction pour la partie 4
-            // COMPLÉTEZ
+            // Touche Espace
+            if (e.keyCode === 32) { // Spacebar
+                // Reset the speed when the Spacebar is released
+                speed = Math.min(speed + acceleration, maxSpeed);
+            }
         }
 
         function init() {
@@ -211,6 +230,7 @@
             window.addEventListener("keyup", releaseSpace, true);
             graphics = canvas.getContext("2d");
 
+            
             // Initialisation
             generate_constellations();
             generate_city();
@@ -218,15 +238,29 @@
         }
 
         function update(){
-            // Mise à jour de la position des édifices
-            // TODO: Complétez cette fonction pour la partie 2
-
-            // On dessine !
+            // Update the position of the buildings based on the vessel's speed
+            for (let i = 0; i < cityLength; i++) {
+                farBuildingsPos[i] += speed * 0.0002;
+                middleBuildingsPos[i] += (speed * 0.5) * 0.0002;
+                closeBuildingsPos[i] += (speed * 0.9) * 0.0002;
+                
+                // If a building is out of the canvas, reposition it to the right
+                if (farBuildingsPos[i] < -buildingWidth) {
+                    farBuildingsPos[i] += cityLength * buildingWidth;
+                }
+                if (middleBuildingsPos[i] < -buildingWidth) {
+                    middleBuildingsPos[i] += cityLength * buildingWidth;
+                }
+                if (closeBuildingsPos[i] < -buildingWidth) {
+                    closeBuildingsPos[i] += cityLength * buildingWidth;
+                }
+            }
             draw()
 
             // Request new animation frame
             requestAnimationFrame(update);
-        }
+}
+
     </script>
 </head>
 <body onload="init()">
