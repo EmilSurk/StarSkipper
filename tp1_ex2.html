@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
     <title>TP1 - Ex2 - Solution</title>
@@ -8,7 +9,6 @@
             height: 100%;
             overflow: hidden;
         }
-
     </style>
     <script>
         let canvas;    // Objet DOM correspondant au canvas
@@ -17,7 +17,7 @@
         // Variable pour la position des étoiles
         let constellations = [];
 
-        /* Propriétés de l'application (Note: vous pouvez changer ces valeurs pour tester votre code) */
+        // Propriétés de l'application
         // Propriétés de la ville
         const cityLength = 64;
         const buildingWidth = 0.1;
@@ -35,12 +35,21 @@
         let vesselPos = {x:0, y:0}
         const maxSpeed = -25;
         const minSpeed = -10;
-        let speed = minSpeed; // pixels per millisecond
-        let acceleration = 0.1; // pixels per millisecond per millisecond
+        let speed = minSpeed; // pixels par milliseconde
+        let acceleration = 0.1; // pixels par milliseconde par milliseconde
 
+        let isSpacebarPressed = false;
+        let triangleIncrement = 0;
+        const maxIncrements = 8;
+        const incrementSize = 16; // Changer cette valeur pour contrôler la taille de chaque incrément
+        let triangleInterval;
+        let buildingSpeedIncrement = 0;
+        let farBuildingSpeed;
+        let middleBuildingSpeed;
+        let frontBuildingSpeed;
 
+        // Générer des constellations
         function generate_constellations(){
-            // Génération des constellations
             let dispersion = 0.1;
 
             for (let i = 0; i < 1/dispersion; i++) {
@@ -60,6 +69,7 @@
             }
         }
 
+        // Générer la ville
         function generate_city() {
             for(let i = 0; i < cityLength; i++) {
                 // Les bâtiments les plus éloignés sont les plus grands
@@ -75,154 +85,162 @@
             }
         }
 
+        // Dessiner le smog
         function draw_smog() {
-            // Dégradé de smog vertical
             const gradient = graphics.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(0, 0, 0, 0.7)"); // Couleur sombre en haut
-            gradient.addColorStop(1, "rgba(0, 0, 0, 0)");   // Transparent en bas
+            gradient.addColorStop(0, "rgba(100, 81, 81, 0.5)"); // Smog violet clair au milieu
+            gradient.addColorStop(1, "rgba(255, 209, 220, 0.20)");   // Transparent en bas
 
-            // Appliquer le dégradé au rectangle plein écran
             graphics.fillStyle = gradient;
             graphics.fillRect(0, 0, canvas.width, canvas.height);
         }
 
+        // Fonction principale de dessin
         function draw() {
-            // On nettoie le canvas avant de redessiner
             graphics.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Dessine le background
             draw_background();
-
-            // On dessine la ville
             draw_city();
-
-            // On dessine le vaisseau
             draw_vessel();
-
-            // Draw smog
             draw_smog();
         }
 
+        // Dessiner le vaisseau
         function draw_vessel() {
-            // Dessiner le vaisseau constitué de deux triangles orientés horizontalement et pointant vers l'extérieur
-
-            // Dessiner la propulsion bleue floue du vaisseau
             graphics.shadowBlur = 20;
             graphics.shadowColor = "blue";
 
-            // Adjust the triangles according to vesselPos values
             let vesselX = canvas.width / 2 + vesselPos.x;
             let vesselY = canvas.height / 2 + vesselPos.y;
 
-            // Triangle gauche (turquoise) pointant vers la gauche
+            let incrementAmount = triangleIncrement * incrementSize;
+
             graphics.fillStyle = "turquoise";
             graphics.beginPath();
-            graphics.moveTo(vesselX, vesselY - 15);  // Point du haut
-            graphics.lineTo(vesselX, vesselY + 15);  // Point du bas
-            graphics.lineTo(vesselX - 60, vesselY);  // Sommet gauche
+            graphics.moveTo(vesselX, vesselY - 15);
+            graphics.lineTo(vesselX, vesselY + 15);
+            graphics.lineTo(vesselX - 20 - incrementAmount, vesselY);
             graphics.closePath();
             graphics.fill();
 
-            graphics.shadowBlur = 0;  // Réinitialiser le flou pour les autres dessins
+            graphics.shadowBlur = 0;
 
-            // Triangle droit (brun clair) pointant vers la droite
-            graphics.fillStyle = "#c68c53";
+            graphics.fillStyle = 'rgba(110, 95, 70, 1)';
             graphics.beginPath();
-            graphics.moveTo(vesselX, vesselY - 15);  // Point du haut
-            graphics.lineTo(vesselX, vesselY + 15);  // Point du bas
-            graphics.lineTo(vesselX + 70, vesselY + 15);  // Sommet droit
+            graphics.moveTo(vesselX, vesselY - 15);
+            graphics.lineTo(vesselX, vesselY + 15);
+            graphics.lineTo(vesselX + 70, vesselY + 15);
             graphics.closePath();
             graphics.fill();
         }
 
-
-
-
-
-        function draw_background(){
-            // Couleur de fond sombre
+        // Dessiner le fond
+        function draw_background() {
             graphics.fillStyle = "#ff99ff";
             graphics.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Dessiner les étoiles et les constellations
-            graphics.fillStyle = "white";
-            graphics.strokeStyle = "white";
-            graphics.lineWidth = 2;
-
             for (const constellation of constellations) {
+                let prevStar = null;
                 for (const star of constellation) {
-                    // Dessiner une étoile sous forme de cercle
+                    graphics.fillStyle = "brown";
                     graphics.beginPath();
-                    graphics.arc(star.x * canvas.width, star.y * canvas.height, 3, 0, Math.PI * 2);
+                    graphics.arc(star.x * canvas.width, star.y * canvas.height, 2, 0, Math.PI * 2);
                     graphics.fill();
 
-                    // Dessiner des lignes pointillées pour les constellations
-                    for (const otherStar of constellation) {
+                    if (prevStar) {
+                        graphics.strokeStyle = "brown";
+                        graphics.lineWidth = 0.5;
                         graphics.beginPath();
-                        graphics.moveTo(star.x * canvas.width, star.y * canvas.height);
-                        graphics.lineTo(otherStar.x * canvas.width, otherStar.y * canvas.height);
+                        graphics.setLineDash([2, 2]);
+                        graphics.moveTo(prevStar.x * canvas.width, prevStar.y * canvas.height);
+                        graphics.lineTo(star.x * canvas.width, star.y * canvas.height);
                         graphics.stroke();
+                        graphics.setLineDash([]);
                     }
+                    prevStar = star;
                 }
             }
         }
 
+        // Dessiner la ville
         function draw_city(){
-            // Dessiner les bâtiments lointains
             graphics.fillStyle = close_build_color;
             for(let i = 0; i < cityLength; i++) {
                 graphics.fillRect(farBuildingsPos[i] * canvas.width, canvas.height - farBuildingsHeights[i], buildingWidth * canvas.width, farBuildingsHeights[i]);
             }
 
-            // Dessiner les bâtiments moyens
-            graphics.fillStyle = middle_building_color;
+             graphics.fillStyle = middle_building_color;
             for(let i = 0; i < cityLength; i++) {
                 graphics.fillRect(middleBuildingsPos[i] * canvas.width, canvas.height - middleBuildingsHeights[i], buildingWidth * canvas.width, middleBuildingsHeights[i]);
             }
 
-            // Dessiner les bâtiments proches
             graphics.fillStyle = far_building_color;
             for(let i = 0; i < cityLength; i++) {
                 graphics.fillRect(closeBuildingsPos[i] * canvas.width, canvas.height - closeBuildingsHeights[i], buildingWidth * canvas.width, closeBuildingsHeights[i]);
             }
         }
 
+        // Mettre à jour la position du vaisseau
         function updateVesselPosition(e){
-
-            // For vertical movement (up and down)
-            if (e.keyCode === 87 || e.keyCode === 38) { // W or Up Arrow
-                vesselPos.y -= 10;
+            if (e.keyCode === 87 || e.keyCode === 38) { // W ou Flèche vers le haut
+                vesselPos.y -= 30;
             }
             
-            if (e.keyCode === 83 || e.keyCode === 40) { // S or Down Arrow
-                vesselPos.y += 10;
+            if (e.keyCode === 83 || e.keyCode === 40) { // S ou Flèche vers le bas
+                vesselPos.y += 30;
             }
-
             
-            if (e.keyCode === 65 || e.keyCode === 37) { // A or Left Arrow
-                vesselPos.x -= 10;
+            if (e.keyCode === 65 || e.keyCode === 37) { // A ou Flèche gauche
+                vesselPos.x -= 30;
             }
 
-            if (e.keyCode === 68 || e.keyCode === 39) { // D or Right Arrow
-                vesselPos.x += 10;
+            if (e.keyCode === 68 || e.keyCode === 39) { // D ou Flèche droite
+                vesselPos.x += 30;
             }
-        
-                    // Check if the space bar is pressed for boost acceleration
-            if (e.keyCode === 32) { // Spacebar
-                speed += acceleration; 
+            
+            if (e.keyCode === 32) { // Barre d'espace
+                isSpacebarPressed = true;
+                clearInterval(triangleInterval);
+                
+
+                if (farBuildingSpeed > maxSpeed) {
+                    buildingSpeedIncrement -= 0.0003;
+                }
+                if (middleBuildingSpeed > maxSpeed) {
+                    buildingSpeedIncrement -= 0.0003;
+                } 
+                if (frontBuildingSpeed > maxSpeed) {
+                    buildingSpeedIncrement -= 0.0003;
+                }
+
+
+                triangleInterval = setInterval(() => {
+                    if (triangleIncrement < maxIncrements) {
+                        triangleIncrement++;
+                    } else {
+                        clearInterval(triangleInterval);
+                    }
+                }, 100);
             }
         }
 
+        // Relâcher la barre d'espace
         function releaseSpace(e){
-            // Touche Espace
-            if (e.keyCode === 32) { // Spacebar
-                // Reset the speed when the Spacebar is released
-                speed = Math.min(speed + acceleration, maxSpeed);
+            if (e.keyCode === 32) { // Barre d'espace
+                isSpacebarPressed = false;
+                buildingSpeedIncrement = 0;
+                clearInterval(triangleInterval);
+                triangleInterval = setInterval(() => {
+                    if (triangleIncrement > 0) {
+                        triangleIncrement--;
+                    } else {
+                        clearInterval(triangleInterval);
+                    }
+                }, 100);
             }
         }
 
+        // Initialisation de l'application
         function init() {
-            // Initialisation du dessin. Il s'affiche sur toute la fenêtre
             canvas = document.getElementById("theCanvas");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -230,21 +248,23 @@
             window.addEventListener("keyup", releaseSpace, true);
             graphics = canvas.getContext("2d");
 
-            
-            // Initialisation
             generate_constellations();
             generate_city();
             requestAnimationFrame(update);
         }
 
-        function update(){
-            // Update the position of the buildings based on the vessel's speed
+        // Mettre à jour l'animation
+        function update(){        
+            farBuildingSpeed = speed * 0.2 * 0.0003 + buildingSpeedIncrement;
+            middleBuildingSpeed = speed * 0.5 * 0.0003 + buildingSpeedIncrement;
+            frontBuildingSpeed = speed * 0.8 * 0.0003 + buildingSpeedIncrement; 
+
             for (let i = 0; i < cityLength; i++) {
-                farBuildingsPos[i] += speed * 0.0002;
-                middleBuildingsPos[i] += (speed * 0.5) * 0.0002;
-                closeBuildingsPos[i] += (speed * 0.9) * 0.0002;
-                
-                // If a building is out of the canvas, reposition it to the right
+                farBuildingsPos[i] += (farBuildingSpeed);
+                middleBuildingsPos[i] += (middleBuildingSpeed);
+                closeBuildingsPos[i] += (frontBuildingSpeed);
+
+
                 if (farBuildingsPos[i] < -buildingWidth) {
                     farBuildingsPos[i] += cityLength * buildingWidth;
                 }
@@ -254,16 +274,13 @@
                 if (closeBuildingsPos[i] < -buildingWidth) {
                     closeBuildingsPos[i] += cityLength * buildingWidth;
                 }
-            }
-            draw()
-
-            // Request new animation frame
+            }   
+            draw();
             requestAnimationFrame(update);
-}
-
+        }
     </script>
 </head>
 <body onload="init()">
-<canvas id="theCanvas"></canvas>
+    <canvas id="theCanvas"></canvas>
 </body>
 </html>
