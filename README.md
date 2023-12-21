@@ -1,6 +1,6 @@
 # 2D Game Development with HTML Canvas
 
-![Game Preview](https://youtu.be/y9iZqcwAiLo)
+![Game Preview](tp1_ex2.png)
 
 This project is a simple 2D game developed using HTML Canvas. It includes various features to create a dynamic gaming experience. Below are the different parts of the project and their descriptions:
 
